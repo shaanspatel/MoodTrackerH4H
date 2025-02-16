@@ -1,0 +1,1 @@
+Mental well-being is often overlooked, and many struggle to recognize patterns in their moods. By visualizing emotions over time, MoodMap helps users gain self-awareness, identify triggers, and take proactive steps toward emotional balance. Whether for self-reflection or professional support, our goal is to make mental health tracking intuitive, insightful, and accessible to all.

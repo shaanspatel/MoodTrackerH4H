@@ -16,7 +16,7 @@ const firebaseConfig = {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-
+let pieChart = null; // Store chart instance globally
 document.addEventListener('DOMContentLoaded', () => {
     // ------------------- AUTH LOGIC (SIGNUP, LOGIN) -------------------
     
@@ -141,6 +141,10 @@ window.addEventListener('load', function () {
     
                             descriptionInput.value = '';
                             document.querySelectorAll('.emoji-button').forEach(button => button.classList.remove('selected'));
+                        
+
+                            
+                        displayMoodAnalysis(user);
                         } catch (error) {
                             console.error('Error saving mood:', error);
                             moodMessage.innerText = 'Error saving mood. Try again later.';
@@ -235,53 +239,6 @@ async function checkOrShowAffirmation() {
 }
 
 
-async function renderMoodPieChart(user) {
-    const userMoodRef = db.collection('users').doc(user.uid).collection('moods');
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    try {
-        const snapshot = await userMoodRef
-            .where('date', '>=', firebase.firestore.Timestamp.fromDate(thirtyDaysAgo))
-            .get();
-
-        const moodCounts = {};
-        snapshot.forEach((doc) => {
-            const mood = doc.data().moodText;
-            moodCounts[mood] = (moodCounts[mood] || 0) + 1;
-        });
-
-        const chartData = Object.entries(moodCounts).map(([mood, count]) => ({
-            mood,
-            count,
-        }));
-
-        const ctx = document.getElementById('moodPieChart').getContext('2d');
-
-        if (!chartData.length) {
-            console.log("No mood data found in the last 30 days.");
-            ctx.font = '16px Arial';
-            ctx.fillText('No mood data in the last 30 days', 10, 50);
-            return;
-        }
-
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: chartData.map((item) => item.mood),
-                datasets: [{
-                    data: chartData.map((item) => item.count),
-                    backgroundColor: ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#c2c2f0'],
-                }],
-            },
-        });
-    } catch (error) {
-        console.error('Error fetching mood data:', error);
-    }
-}
-
-
-
 
 
 
@@ -291,20 +248,26 @@ function startMoodChartListener(user) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Real-time listener
     userMoodRef
         .where('date', '>=', firebase.firestore.Timestamp.fromDate(thirtyDaysAgo))
         .onSnapshot((snapshot) => {
             const moodCounts = {};
+            let totalCount = 0;
 
             snapshot.forEach((doc) => {
                 const mood = doc.data().moodText;
                 moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+                totalCount++;
             });
+
+            // Update local state when Firestore sends updates
+            localMoodCounts = moodCounts;
+            totalLocalMoodEntries = totalCount;
 
             const chartData = Object.entries(moodCounts).map(([mood, count]) => ({
                 mood,
                 count,
+                percentage: ((count / totalCount) * 100).toFixed(1),
             }));
 
             updatePieChart(chartData);
@@ -321,7 +284,7 @@ const moodColors = {
     Excited: '#32CD32', 
     Neutral: '#A9A9A9'   
 };
-let pieChart = null; // Store chart instance globally
+
 
 function updatePieChart(chartData) {
     const ctx = document.getElementById('moodPieChart').getContext('2d');
@@ -331,14 +294,17 @@ function updatePieChart(chartData) {
         pieChart.destroy();
     }
 
+    // Guard clause if no data to avoid crashing Chart.js
+    if (chartData.length === 0) {
+        console.log('No data to display in Pie Chart');
+        return;
+    }
+
     // Calculate total entries
     const totalEntries = chartData.reduce((sum, item) => sum + item.count, 0);
 
-    // Convert counts to percentages
-    const percentages = chartData.map(item => ((item.count / totalEntries) * 100).toFixed(1));
-
-    // Create a new chart
-    new Chart(ctx, {
+    // Create the new chart
+    pieChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: chartData.map((item) => item.mood),
@@ -378,6 +344,39 @@ function updatePieChart(chartData) {
             },
         },
     });
+}
+
+
+
+async function fetchAndUpdatePieChart(user) {
+    const userMoodRef = db.collection('users').doc(user.uid).collection('moods');
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    try {
+        const snapshot = await userMoodRef
+            .where('date', '>=', firebase.firestore.Timestamp.fromDate(thirtyDaysAgo))
+            .get();
+
+        const moodCounts = {};
+        let totalCount = 0;
+
+        snapshot.forEach((doc) => {
+            const mood = doc.data().moodText;
+            moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+            totalCount++;
+        });
+
+        const chartData = Object.entries(moodCounts).map(([mood, count]) => ({
+            mood,
+            count,
+            percentage: ((count / totalCount) * 100).toFixed(1),
+        }));
+
+        updatePieChart(chartData);
+    } catch (error) {
+        console.error('Error fetching mood data:', error);
+    }
 }
 
 
@@ -469,8 +468,8 @@ firebase.auth().onAuthStateChanged(user => {
     if (user && window.location.pathname.includes('dashboard.html')) {
         console.log("User is logged in:", user.email);
         checkOrShowAffirmation();
-        startMoodChartListener(user);
-        displayMoodAnalysis(user); // NEW CALL HERE
+        startMoodChartListener(user); // Live updates!
+        displayMoodAnalysis(user);
     } else {
         console.log("No user logged in or not on dashboard.html");
     }

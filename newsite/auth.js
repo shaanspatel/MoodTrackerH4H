@@ -318,7 +318,7 @@ const moodColors = {
     Happy: '#FFD700',    
     Sad: '#6495ED',      
     Anxious: '#FF4500',    
-    Excited: '#32CD32',    
+    Excited: '#32CD32', 
     Neutral: '#A9A9A9'   
 };
 let pieChart = null; // Store chart instance globally
@@ -338,10 +338,10 @@ function updatePieChart(chartData) {
     const percentages = chartData.map(item => ((item.count / totalEntries) * 100).toFixed(1));
 
     // Create a new chart
-    pieChart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: chartData.map((item, index) => `${item.mood} (${percentages[index]}%)`),
+            labels: chartData.map((item) => item.mood),
             datasets: [{
                 data: chartData.map((item) => item.count),
                 backgroundColor: chartData.map((item) => moodColors[item.mood] || '#D3D3D3'),
@@ -352,18 +352,29 @@ function updatePieChart(chartData) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top',
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: {
+                            size: 12,
+                        },
+                        generateLabels: function (chart) {
+                            const dataset = chart.data.datasets[0];
+                            const total = dataset.data.reduce((acc, value) => acc + value, 0);
+                            return chart.data.labels.map((label, i) => {
+                                const value = dataset.data[i];
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return {
+                                    text: `${label} (${percentage}%)`,
+                                    fillStyle: dataset.backgroundColor[i],
+                                    strokeStyle: dataset.backgroundColor[i],
+                                    hidden: isNaN(dataset.data[i]) || dataset.data[i] === 0,
+                                    index: i,
+                                };
+                            });
+                        },
+                    },
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function (tooltipItem) {
-                            const mood = chartData[tooltipItem.dataIndex].mood;
-                            const count = chartData[tooltipItem.dataIndex].count;
-                            const percentage = percentages[tooltipItem.dataIndex];
-                            return `${mood}: ${count} entries (${percentage}%)`;
-                        }
-                    }
-                }
             },
         },
     });
@@ -442,7 +453,7 @@ async function displayMoodAnalysis(user) {
         resourcesText.innerText = moodResources[maxMood] || "Keep listening to your emotions and practicing self-care!";
     } else {
         analysisText.innerText = "No mood data recorded in the last 7 days.";
-        resourcesText.innerText = "";
+        resourcesText.innerText = "Start logging your moods to receive personalized insights and support.";
     }
 
     // Always show support resources

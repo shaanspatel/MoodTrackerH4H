@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mood Tracker Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase Dependencies -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+<!-- Your Auth Logic -->
+<script defer src="auth.js"></script>
+
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class ="dashboard-body">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <div class="dashboard-container">
+
+        <!-- Mood Submission Box -->
+        <div class="box mood-box">
+            <h2>How are you feeling today?</h2>
+            <div class="emoji-container">
+                <button class="emoji-button" data-mood="Happy">😊<span>Happy</span></button>
+                <button class="emoji-button" data-mood="Sad">😢<span>Sad</span></button>
+                <button class="emoji-button" data-mood="Anxious">😰<span>Anxious</span></button>
+                <button class="emoji-button" data-mood="Excited">😲<span>Excited</span></button>
+                <button class="emoji-button" data-mood="Neutral">😐<span>Neutral</span></button>
+            </div>
+            <textarea id="description" placeholder="Anything you want to add?"></textarea>
+            <button id="submit-mood">Submit Mood</button>
+            <div id="mood-message" style="margin-top: 12px; color: #ff4757; font-size: 18px; font-weight: bold;"></div>
+        </div>
+
+        <div class="flower flower-top-left">
+            <div class="petal petal-1"></div>
+            <div class="petal petal-2"></div>
+            <div class="petal petal-3"></div>
+            <div class="petal petal-4"></div>
+            <div class="petal petal-5"></div>
+            <div class="center-1"></div>
+          </div>
+          <div class="flower flower-top-right">
+            <div class="petal petal-1"></div>
+            <div class="petal petal-2"></div>
+            <div class="petal petal-3"></div>
+            <div class="petal petal-4"></div>
+            <div class="petal petal-5"></div>
+            <div class="center-1"></div>
+          </div>
+          
+        
+
+    
+        <div id="mood-analysis-section" class="box analysis-box">
+            <h2 class="mood-analysis-header" > </h2>Your Mood Analysis</h2>
+            <div id="mood-analysis-highlight" class="mood-highlight-box">
+                <p id="mood-analysis-text" class="mood-text">Loading your mood trends...</p>
+            </div>
+            <p id="mood-resources-text" class="mood-resources"></p>
+            <div id="support-message" class="support-section"></div>
+        </div>
+
+        
+        
+            
+
+        <div class="right-column">
+            <div class="box affirmation-box">
+                <h2>Daily Affirmation</h2>
+                <p id="affirmation-text">Your affirmation will appear here.</p>
+                <button id="affirmation-button" style="display: none;">Get Affirmation</button>
+            </div>
+            <div class="box pie-chart-box">
+                <h2>Mood Chart</h2>
+                <div class="chart-container">
+                    <canvas id="moodPieChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+            
+            
+            
+            
+            
+            
+        </div>
+    
+
+        <!-- Footer with Logout -->
+        <div class="footer">
+            
+            <button id="logout-button" class="logout-button">Logout</button>
+        </div>
+
+    </div>
+    
+  
+    
+</body>
+</html>

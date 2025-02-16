@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Mood Tracker</title>
+</head>
+<body>
+    <h1>Mood Tracker</h1>
+
+    <form id="mood-form">
+        <label for="mood">How are you feeling today?</label>
+        <select id="mood" required>
+            <option value="" disabled selected>Select One</option>
+            <option value="1:Happy">Happy 😊</option>
+            <option value="-1:Sad">Sad 😢</option>
+            <option value="-2:Stressed">Stressed 😰</option>
+            <option value="2:Excited">Excited 🎉</option>
+            <option value="0:Neutral">Neutral 😐</option>
+        </select>
+    
+        <label for="description">Anything you want to add?</label>
+        <textarea id="description" placeholder="Describe your day..." rows="3"></textarea>
+    
+        <button type="submit">Submit Mood</button>
+    </form>
+    
+    <p id="mood-message" style="color:green;"></p>
+    
+
+    <p id="mood-message" style="color:green;"></p>
+    <h2>Mood Overview (Last 30 Days)</h2>
+    <div style="text-align: left;">
+        <canvas id="moodPieChart" width="300" height="300" style="display: block; margin: 0 auto;"></canvas>
+    </div>
+    <h3 id="moodSummary">Loading 7-day summary...</h3>
+
+
+    <button id="logout">Logout</button>
+
+<!-- chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <!-- firebase sdk (compat versions) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+   
+    <script src="app.js"></script>
+
+</body>
+</html>
